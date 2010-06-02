@@ -8,6 +8,7 @@ use Dumpvalue;
 # yamlファイル名
 use constant NICOYAML_FILENAME => '.niconicobot.yaml';
 use constant CONFIG_FILENAME => 'config.yaml';
+use constant CHECK_DEDUPED_FLAG => 1;
 
 # OAuth configs
 my $config = YAML::Tiny::LoadFile(CONFIG_FILENAME);
@@ -31,6 +32,7 @@ ok($nb->{twitter},'new(initialize)');
 my $before_nico_info = YAML::Tiny::LoadFile(NICOYAML_FILENAME);
 
 # xmlとyamlの比較
+# check_deduped
 my $d = Dumpvalue->new();
 my @xml_data = (
     {
@@ -68,11 +70,13 @@ ok(
     'check_deduped[return 1]'
 );
 
+# is_undef_or_empty
 can_ok($nb,'is_undef_or_empty');
 ok($nb->is_undef_or_empty(undef),'is_undef_or_empty[undef]');
 ok($nb->is_undef_or_empty(''),'is_undef_or_empty[empty]');
 ok(!$nb->is_undef_or_empty('test'),'is_undef_or_empty[not empty]');
 
+# make_post_str
 can_ok($nb,'make_post_str');
 foreach my $post_data(@$xml_ref){
     is(
@@ -98,3 +102,22 @@ foreach my $post_data(@$xml_ref){
         'make_post_str[ng]'
     );
 }
+
+# exec_niconicobot
+can_ok($nb,'exec_niconicobot');
+ok(
+    $nb->exec_niconicobot($before_nico_info,$xml_ref,CHECK_DEDUPED_FLAG),
+    'exec_niconicobot[ok]'
+);
+ok(
+    !$nb->exec_niconicobot($xml_ref,$xml_ref,CHECK_DEDUPED_FLAG),
+    'exec_niconicobot[ng]'
+);
+ok(
+    $nb->exec_niconicobot($before_nico_info,$xml_ref,0),
+    'exec_niconicobot[ok]'
+);
+ok(
+    $nb->exec_niconicobot($xml_ref,$xml_ref,0),
+    'exec_niconicobot[ok]'
+);

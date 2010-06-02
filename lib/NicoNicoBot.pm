@@ -58,5 +58,23 @@ sub make_post_str {
     return $post_str;
 }
 
+sub exec_niconicobot {
+    my $self = shift;
+    my $old_data = shift;
+    my $new_data = shift;
+    my $check_deduped_flag = shift;
+
+    if($check_deduped_flag && $self->check_deduped($old_data,$new_data)){
+        return 0;
+    }
+
+    foreach my $data(@$new_data){
+        my $post_str = $self->make_post_str($data->{title},$data->{link});
+        # post api
+        # post api失敗したらreturn 0
+    }
+    return 1;
+}
+
 1;
 
