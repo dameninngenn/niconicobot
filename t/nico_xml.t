@@ -69,28 +69,3 @@ foreach my $item (@$result_ref) {
     );
 }
 
-like(
-    $result_ref->[0]->{id},
-    qr/^(\d+)$/,
-    'get_nico_info[id is /^(\d+)$/]'
-);
-like(
-    $result_ref->[1]->{id},
-    qr/^(\d+)$/,
-    'get_nico_info[id is /^(\d+)$/]'
-);
-like(
-    $result_ref->[0]->{link},
-    qr/^http.*sm(\d+)$/,
-    'get_nico_info[title is /^http.*sm(\d+)$/]'
-);
-like(
-    $result_ref->[2]->{link},
-    qr/^http.*sm(\d+)$/,
-    'get_nico_info[title is /^http.*sm(\d+)$/]'
-);
-ok(
-    !$result_ref->[3]->{link},
-    'get_nico_info[over number argument]'
-);
-
