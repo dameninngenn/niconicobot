@@ -121,3 +121,45 @@ ok(
     $nb->exec_niconicobot($xml_ref,$xml_ref,0),
     'exec_niconicobot[ok]'
 );
+
+# get_friends_ids
+can_ok($nb,'get_friends_ids');
+ok(
+    $nb->get_friends_ids(),
+    'get_friends_ids[ok]'
+);
+
+# get_followers_ids
+can_ok($nb,'get_followers_ids');
+ok(
+    $nb->get_followers_ids(),
+    'get_followers_ids[ok]'
+);
+
+# make_friends_hash
+can_ok($nb,'make_friends_hash');
+ok(
+    $nb->make_friends_hash(),
+    'make_friends_hash[ok]'
+);
+
+# do_create_friendship
+can_ok($nb,'do_create_friendship');
+#ok(
+#    $nb->do_create_friendship(),
+#    'do_create_friendship[ok]'
+#);
+
+# do_destroy_friendship
+can_ok($nb,'do_destroy_friendship');
+#ok(
+#    $nb->do_destroy_friendship(),
+#    'do_destroy_friendship[ok]'
+#);
+
+# friends_eq_followers
+can_ok($nb,'friends_eq_followers');
+ok(
+    $nb->friends_eq_followers(),
+    'friends_eq_followers[ok]'
+);

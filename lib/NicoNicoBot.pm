@@ -2,6 +2,7 @@ package NicoNicoBot;
 
 use strict;
 use warnings;
+use utf8;
 use Net::Twitter;
 use Dumpvalue;
 
@@ -13,6 +14,9 @@ sub new {
     my $access_token_secret = shift;
     my $self = {
         twitter => undef,
+        friends_ids => undef,
+        followers_ids => undef,
+        friends_hash => undef,
     };
     $self->{twitter} = Net::Twitter->new(
                           traits          => ['API::REST', 'OAuth'],
@@ -68,11 +72,91 @@ sub exec_niconicobot {
         return 0;
     }
 
-    foreach my $data(@$new_data){
-        my $post_str = $self->make_post_str($data->{title},$data->{link});
-        # post api
-        # post api失敗したらreturn 0
+    eval{
+        foreach my $data(@$new_data){
+            my $post_str = $self->make_post_str($data->{title},$data->{link});
+            #my $result = $self->{twitter}->update({ status => "$post_str" });
+            #unless($result){
+            #    return 0;
+            #}
+            #sleep(5);
+        }
+    };
+    return 0 if($@);
+    return 1;
+}
+
+sub get_friends_ids {
+    my $self = shift;
+    eval{
+        $self->{friends_ids} = $self->{twitter}->friends_ids();
+    };
+    return 0 if($@);
+    return 0 unless($self->{friends_ids});
+    return 1;
+}
+
+sub get_followers_ids {
+    my $self = shift;
+    eval{
+        $self->{followers_ids} = $self->{twitter}->followers_ids();
+    };
+    return 0 if($@);
+    return 0 unless($self->{followers_ids});
+    return 1;
+}
+
+sub make_friends_hash {
+    my $self = shift;
+    eval{
+        my %friends_hash = map{($_ => 1)}@{$self->{friends_ids}};
+        $self->{friends_hash} = \%friends_hash;
+    };
+    return 0 if($@);
+    return 1;
+}
+
+sub do_create_friendship {
+    my $self = shift;
+    foreach my $followers_id(@{$self->{followers_ids}}){
+        my $result = delete $self->{friends_hash}->{$followers_id};
+        unless (defined $result){
+            eval{
+                my $create_result = $self->{twitter}->create_friend({ user_id => "$followers_id" });
+            };
+            if($@ =~ m/フォローのリクエストを送ってあります/ || $@ =~ m/suspend/){
+                print "$followers_id","\n";
+                next;
+            }
+            elsif($@){
+                return 0;
+            }
+        }
     }
+    return 1;
+}
+
+sub do_destroy_friendship {
+    my $self = shift;
+    eval{
+        foreach my $friends_id(keys %{$self->{friends_hash}}){
+            my $result = $self->{twitter}->destroy_friend({ user_id => "$friends_id" });
+            return 0 unless($result);
+            print "delete","\n";
+        }
+    };
+    return 0 if($@);
+    return 1;
+}
+
+sub friends_eq_followers {
+    my $self = shift;
+
+    return 0 unless($self->get_friends_ids());
+    return 0 unless($self->get_followers_ids());
+    return 0 unless($self->make_friends_hash());
+    return 0 unless($self->do_create_friendship());
+    return 0 unless($self->do_destroy_friendship());
     return 1;
 }
 
