@@ -29,7 +29,7 @@ sub new {
     return $self;
 }
 
-sub check_deduped {
+sub _check_deduped {
     my $self = shift;
     my $old_data = shift;
     my $new_data = shift;
@@ -42,7 +42,7 @@ sub check_deduped {
     return 1;
 }
 
-sub is_undef_or_empty {
+sub _is_undef_or_empty {
     my $self = shift;
     my $value = shift;
     unless($value){
@@ -51,12 +51,12 @@ sub is_undef_or_empty {
     return 0;
 }
 
-sub make_post_str {
+sub _make_post_str {
     my $self = shift;
     my $title = shift;
     my $link = shift;
 
-    return 0 if($self->is_undef_or_empty($link));
+    return 0 if($self->_is_undef_or_empty($link));
 
     my $post_str = $title.' '.$link;
     return $post_str;
@@ -68,25 +68,25 @@ sub exec_niconicobot {
     my $new_data = shift;
     my $check_deduped_flag = shift;
 
-    if($check_deduped_flag && $self->check_deduped($old_data,$new_data)){
+    if($check_deduped_flag && $self->_check_deduped($old_data,$new_data)){
         return 0;
     }
 
     eval{
         foreach my $data(@$new_data){
-            my $post_str = $self->make_post_str($data->{title},$data->{link});
-            #my $result = $self->{twitter}->update({ status => "$post_str" });
-            #unless($result){
-            #    return 0;
-            #}
-            #sleep(5);
+            my $post_str = $self->_make_post_str($data->{title},$data->{link});
+            my $result = $self->{twitter}->update({ status => "$post_str" });
+            unless($result){
+                return 0;
+            }
+            sleep(5);
         }
     };
     return 0 if($@);
     return 1;
 }
 
-sub get_friends_ids {
+sub _get_friends_ids {
     my $self = shift;
     eval{
         $self->{friends_ids} = $self->{twitter}->friends_ids();
@@ -96,7 +96,7 @@ sub get_friends_ids {
     return 1;
 }
 
-sub get_followers_ids {
+sub _get_followers_ids {
     my $self = shift;
     eval{
         $self->{followers_ids} = $self->{twitter}->followers_ids();
@@ -106,7 +106,7 @@ sub get_followers_ids {
     return 1;
 }
 
-sub make_friends_hash {
+sub _make_friends_hash {
     my $self = shift;
     eval{
         my %friends_hash = map{($_ => 1)}@{$self->{friends_ids}};
@@ -116,7 +116,7 @@ sub make_friends_hash {
     return 1;
 }
 
-sub do_create_friendship {
+sub _do_create_friendship {
     my $self = shift;
     foreach my $followers_id(@{$self->{followers_ids}}){
         my $result = delete $self->{friends_hash}->{$followers_id};
@@ -125,7 +125,6 @@ sub do_create_friendship {
                 my $create_result = $self->{twitter}->create_friend({ user_id => "$followers_id" });
             };
             if($@ =~ m/フォローのリクエストを送ってあります/ || $@ =~ m/suspend/){
-                print "$followers_id","\n";
                 next;
             }
             elsif($@){
@@ -136,13 +135,12 @@ sub do_create_friendship {
     return 1;
 }
 
-sub do_destroy_friendship {
+sub _do_destroy_friendship {
     my $self = shift;
     eval{
         foreach my $friends_id(keys %{$self->{friends_hash}}){
             my $result = $self->{twitter}->destroy_friend({ user_id => "$friends_id" });
             return 0 unless($result);
-            print "delete","\n";
         }
     };
     return 0 if($@);
@@ -152,11 +150,11 @@ sub do_destroy_friendship {
 sub friends_eq_followers {
     my $self = shift;
 
-    return 0 unless($self->get_friends_ids());
-    return 0 unless($self->get_followers_ids());
-    return 0 unless($self->make_friends_hash());
-    return 0 unless($self->do_create_friendship());
-    return 0 unless($self->do_destroy_friendship());
+    return 0 unless($self->_get_friends_ids());
+    return 0 unless($self->_get_followers_ids());
+    return 0 unless($self->_make_friends_hash());
+    return 0 unless($self->_do_create_friendship());
+    return 0 unless($self->_do_destroy_friendship());
     return 1;
 }
 

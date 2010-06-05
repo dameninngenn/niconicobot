@@ -3,6 +3,7 @@ use warnings;
 use Test::More 'no_plan';
 use lib qw(../lib);
 use YAML::Tiny;
+use utf8;
 use Dumpvalue;
 
 # yamlファイル名
@@ -32,7 +33,7 @@ ok($nb->{twitter},'new(initialize)');
 my $before_nico_info = YAML::Tiny::LoadFile(NICOYAML_FILENAME);
 
 # xmlとyamlの比較
-# check_deduped
+# _check_deduped
 my $d = Dumpvalue->new();
 my @xml_data = (
     {
@@ -53,53 +54,53 @@ my @xml_data = (
 );
 my $xml_ref = \@xml_data;
 
-can_ok($nb,'check_deduped');
+can_ok($nb,'_check_deduped');
 ok(
-    !$nb->check_deduped(
+    !$nb->_check_deduped(
         $before_nico_info,
         $xml_ref
     ),
-    'check_deduped[return 0]'
+    '_check_deduped[return 0]'
 );
 
 ok(
-    $nb->check_deduped(
+    $nb->_check_deduped(
         $xml_ref,
         $xml_ref
     ),
-    'check_deduped[return 1]'
+    '_check_deduped[return 1]'
 );
 
-# is_undef_or_empty
-can_ok($nb,'is_undef_or_empty');
-ok($nb->is_undef_or_empty(undef),'is_undef_or_empty[undef]');
-ok($nb->is_undef_or_empty(''),'is_undef_or_empty[empty]');
-ok(!$nb->is_undef_or_empty('test'),'is_undef_or_empty[not empty]');
+# _is_undef_or_empty
+can_ok($nb,'_is_undef_or_empty');
+ok($nb->_is_undef_or_empty(undef),'_is_undef_or_empty[undef]');
+ok($nb->_is_undef_or_empty(''),'_is_undef_or_empty[empty]');
+ok(!$nb->_is_undef_or_empty('test'),'_is_undef_or_empty[not empty]');
 
-# make_post_str
-can_ok($nb,'make_post_str');
+# _make_post_str
+can_ok($nb,'_make_post_str');
 foreach my $post_data(@$xml_ref){
     is(
-        $nb->make_post_str(
+        $nb->_make_post_str(
             $post_data->{title},
             $post_data->{link}
         ),
         $post_data->{title}.' '.$post_data->{link},
-        'make_post_str[ok]'
+        '_make_post_str[ok]'
     );
     ok(
-        !$nb->make_post_str(
+        !$nb->_make_post_str(
             $post_data->{title},
             undef
         ),
-        'make_post_str[ng]'
+        '_make_post_str[ng]'
     );
     ok(
-        !$nb->make_post_str(
+        !$nb->_make_post_str(
             $post_data->{title},
             ''
         ),
-        'make_post_str[ng]'
+        '_make_post_str[ng]'
     );
 }
 
@@ -122,39 +123,39 @@ ok(
     'exec_niconicobot[ok]'
 );
 
-# get_friends_ids
-can_ok($nb,'get_friends_ids');
+# _get_friends_ids
+can_ok($nb,'_get_friends_ids');
 ok(
-    $nb->get_friends_ids(),
-    'get_friends_ids[ok]'
+    $nb->_get_friends_ids(),
+    '_get_friends_ids[ok]'
 );
 
-# get_followers_ids
-can_ok($nb,'get_followers_ids');
+# _get_followers_ids
+can_ok($nb,'_get_followers_ids');
 ok(
-    $nb->get_followers_ids(),
-    'get_followers_ids[ok]'
+    $nb->_get_followers_ids(),
+    '_get_followers_ids[ok]'
 );
 
-# make_friends_hash
-can_ok($nb,'make_friends_hash');
+# _make_friends_hash
+can_ok($nb,'_make_friends_hash');
 ok(
-    $nb->make_friends_hash(),
-    'make_friends_hash[ok]'
+    $nb->_make_friends_hash(),
+    '_make_friends_hash[ok]'
 );
 
-# do_create_friendship
-can_ok($nb,'do_create_friendship');
+# _do_create_friendship
+can_ok($nb,'_do_create_friendship');
 #ok(
-#    $nb->do_create_friendship(),
-#    'do_create_friendship[ok]'
+#    $nb->_do_create_friendship(),
+#    '_do_create_friendship[ok]'
 #);
 
-# do_destroy_friendship
-can_ok($nb,'do_destroy_friendship');
+# _do_destroy_friendship
+can_ok($nb,'_do_destroy_friendship');
 #ok(
-#    $nb->do_destroy_friendship(),
-#    'do_destroy_friendship[ok]'
+#    $nb->_do_destroy_friendship(),
+#    '_do_destroy_friendship[ok]'
 #);
 
 # friends_eq_followers
